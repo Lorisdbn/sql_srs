@@ -3,8 +3,15 @@ import pandas as pd
 import duckdb
 
 
-st.write("Bonjour")
+st.title("SQL Playground 🚀")
 
+option = st.selectbox(
+    "What would you like to review?",
+    ("Joins", "GroupBy", "Windows function"),
+    placeholder="Select a theme"
+)
+
+st.write("You selected:", option)
 
 data = {
     "a": [1, 2, 3],
