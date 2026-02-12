@@ -1,34 +1,38 @@
+
 import streamlit as st
-import pandas as pd
 import duckdb
+import os
+import logging
 
-df_beverages = pd.DataFrame({
-    "beverage": [
-        "Coffee", "Tea", "Orange Juice", "Soda", "Water",
-        "Latte", "Cappuccino", "Iced Tea", "Lemonade", "Smoothie"
-    ],
-    "price": [3, 2, 4, 3, 1, 5, 5, 3, 4, 6]
-})
+if "data" not in os.listdir():
+    logging.error(os.listdir())
+    logging.error("creating data folder")
+    os.mkdir("data")
 
-df_food = pd.DataFrame({
-    "food": [
-        "Burger", "Pizza", "Salad", "Pasta", "Sandwich",
-        "Fries", "Tacos", "Sushi", "Steak", "Wrap"
-    ],
-    "price": [10, 12, 8, 11, 7, 4, 9, 14, 18, 8]
-})
+if "exo_sql_tables.duckdb" not in os.listdir("data"):
+    exec(open("init_db.py").read())
 
-answer= "SELECT * FROM df_food CROSS JOIN  df_beverages"
-solution = duckdb.sql(answer).df()
 
+
+
+con = duckdb.connect(database="data/exo_sql_tables.duckdb", read_only=False)
 
 with st.sidebar:
-    option = st.selectbox(
+    theme = st.selectbox(
         "What would you like to review?",
-        ("Joins", "GroupBy", "Windows function"),
-        placeholder="Select a theme"
+        ("cross_joins", "GroupBy", "window_functions"),
+        placeholder="Select a theme",
     )
-    st.write("You selected:", option)
+    st.write("You selected:", theme)
+
+    exercise=con.execute(f"SELECT * FROM memory_state WHERE theme ='{theme}'").df().sort_values("last_reviewed").reset_index()
+    st.write(exercise)
+
+    exercise_name = exercise.loc[0, "exercise_name"]
+    with open(f"answers/{exercise_name}.sql","r") as f:
+        answer = f.read()
+
+    solution_df = con.execute(answer).df()
 
 st.title("SQL Playground 🚀")
 
@@ -36,17 +40,34 @@ st.header("enter your code here:")
 sql_query = st.text_area(label="Input text", key="input1")
 
 if sql_query:
-    result = duckdb.query(sql_query).df()
-    st.write(f"you entered the following query : {sql_query}")
+    result = con.execute(sql_query).df()
     st.dataframe(result)
 
-tab_1, tab_2 = st.tabs(["Tables", "Solution"])
+    try:
+        result = result[solution_df.columns]
+        st.dataframe(result.compare(solution_df))
+    except KeyError:
+        st.write("Columns number does not match")
 
-with tab_1:
-    st.write(df_beverages)
-    st.write(df_food)
-    st.write("expected:")
-    st.dataframe(solution)
+
+
+
+    n_lines_difference = result.shape[0] - solution_df.shape[0]
+
+    if n_lines_difference != 0:
+        st.write(
+            f"Your result has a {n_lines_difference} lines difference with the solution_df"
+        )
+
+
+tab_2, tab_3 = st.tabs(["Tables", "Solution"])
 
 with tab_2:
+    exercise_table= exercise.loc[0, "tables"]
+    for table in exercise_table:
+        st.write(f"table :{table}")
+        df_table = con.execute(f"SELECT * FROM {table}").df()
+        st.dataframe(df_table)
+
+with tab_3:
     st.write(answer)
