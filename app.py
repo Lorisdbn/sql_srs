@@ -10,7 +10,8 @@ if "data" not in os.listdir():
     os.mkdir("data")
 
 if "exo_sql_tables.duckdb" not in os.listdir("data"):
-    exec(open(init_db.py).read())
+    exec(open("init_db.py").read())
+
 
 
 
