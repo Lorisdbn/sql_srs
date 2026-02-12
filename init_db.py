@@ -16,7 +16,9 @@ data = {
     "last_reviewed": ["1990-01-01","1970-01-01"],
 }
 memory_state_df = pd.DataFrame(data)
-con.execute("CREATE TABLE IF NOT EXISTS memory_state AS SELECT * FROM memory_state_df")
+con.execute("DROP TABLE IF EXISTS memory_state")
+con.execute("CREATE TABLE memory_state AS SELECT * FROM memory_state_df")
+
 
 
 # ------------------------------------------------------------
@@ -78,3 +80,5 @@ trademark = pd.DataFrame(
 )
 
 con.execute("CREATE TABLE IF NOT EXISTS trademark AS SELECT * FROM trademark")
+
+con.close()
