@@ -10,10 +10,10 @@ con = duckdb.connect(database="data/exo_sql_tables.duckdb", read_only=False)
 # ------------------------------------------------------------
 
 data = {
-    "theme": ["cross_joins","window_functions"],
-    "exercise_name": ["beverages_and_food","simple_window"],
-    "tables": [["beverages", "food"], "simple_window"],
-    "last_reviewed": ["1980-01-01","1980-01-01"],
+    "theme": ["cross_joins","cross_joins"],
+    "exercise_name": ["beverages_and_food","sizes_and_trademark"],
+    "tables": [["beverages", "food"], ["size", "trademark"]],
+    "last_reviewed": ["1990-01-01","1970-01-01"],
 }
 memory_state_df = pd.DataFrame(data)
 con.execute("CREATE TABLE IF NOT EXISTS memory_state AS SELECT * FROM memory_state_df")
@@ -62,3 +62,19 @@ food = pd.DataFrame(
 
 
 con.execute("CREATE TABLE IF NOT EXISTS food AS SELECT * FROM food")
+
+size = pd.DataFrame(
+    {
+        "size": ["XS","S","M","L","XL"]
+    }
+)
+
+con.execute("CREATE TABLE IF NOT EXISTS size AS SELECT * FROM size")
+
+trademark = pd.DataFrame(
+    {
+        "trademark": ["Nike","Abercrombie","Lewis","Asphalte"]
+    }
+)
+
+con.execute("CREATE TABLE IF NOT EXISTS trademark AS SELECT * FROM trademark")
