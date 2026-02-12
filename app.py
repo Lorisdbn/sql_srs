@@ -18,14 +18,29 @@ if "exo_sql_tables.duckdb" not in os.listdir("data"):
 con = duckdb.connect(database="data/exo_sql_tables.duckdb", read_only=False)
 
 with st.sidebar:
+    available_themes_df = con.execute("SELECT DISTINCT theme FROM memory_state").df()
     theme = st.selectbox(
         "What would you like to review?",
-        ("cross_joins", "GroupBy", "window_functions"),
+        available_themes_df,
         placeholder="Select a theme",
     )
-    st.write("You selected:", theme)
 
-    exercise=con.execute(f"SELECT * FROM memory_state WHERE theme ='{theme}'").df().sort_values("last_reviewed").reset_index()
+    if theme:
+        st.write("You selected:", theme)
+        exercise=(
+        con.execute(f"SELECT * FROM memory_state WHERE theme ='{theme}'")
+        .df()
+        .sort_values("last_reviewed")
+        .reset_index()
+        )
+    else:
+        exercise = (
+        con.execute(f"SELECT * FROM memory_state")
+        .df()
+        .sort_values("last_reviewed")
+        .reset_index()
+        )
+
     st.write(exercise)
 
     exercise_name = exercise.loc[0, "exercise_name"]
