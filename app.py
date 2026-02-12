@@ -4,9 +4,6 @@ import duckdb
 import ast
 
 con = duckdb.connect(database="data/exo_sql_tables.duckdb", read_only=False)
-# answer_str = "SELECT * FROM df_food CROSS JOIN  df_beverages"
-# solution_df = duckdb.sql(answer_str).df()
-
 
 with st.sidebar:
     theme = st.selectbox(
@@ -19,6 +16,12 @@ with st.sidebar:
     exercise=con.execute(f"SELECT * FROM memory_state WHERE theme ='{theme}'").df()
     st.write(exercise)
 
+    exercise_name = exercise.loc[0, "exercise_name"]
+    with open(f"answers/{exercise_name}.sql","r") as f:
+        answer = f.read()
+
+    solution_df = con.execute(answer).df()
+
 st.title("SQL Playground 🚀")
 
 st.header("enter your code here:")
@@ -26,15 +29,23 @@ sql_query = st.text_area(label="Input text", key="input1")
 
 if sql_query:
     result = con.execute(sql_query).df()
-    st.write(f"you entered the following query : {sql_query}")
     st.dataframe(result)
 
-# try:
-#     result = result[solution_df.columns]
-#     st.dataframe(result.compare(solution_df))
-# except KeyError:
-#     st.write("Columns number does not match")
-#
+try:
+    result = result[solution_df.columns]
+    st.dataframe(result.compare(solution_df))
+except KeyError:
+    st.write("Columns number does not match")
+
+
+n_lines_difference = result.shape[0] - solution_df.shape[0]
+
+if n_lines_difference != 0:
+    st.write(
+        f"Your result has a {n_lines_difference} lines difference with the solution_df"
+    )
+
+
 tab_2, tab_3 = st.tabs(["Tables", "Solution"])
 
 with tab_2:
@@ -45,7 +56,4 @@ with tab_2:
         st.dataframe(df_table)
 
 with tab_3:
-    exercise_name = exercise.loc[0, "exercise_name"]
-    with open(f"answers/{exercise_name}.sql","r") as f:
-        answer = f.read()
     st.write(answer)
