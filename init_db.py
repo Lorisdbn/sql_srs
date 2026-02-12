@@ -1,4 +1,4 @@
-import io
+
 import duckdb
 import pandas as pd
 
@@ -12,7 +12,7 @@ con = duckdb.connect(database="data/exo_sql_tables.duckdb", read_only=False)
 data = {
     "theme": ["cross_joins","window_functions"],
     "exercise_name": ["beverages_and_food","simple_window"],
-    "tables": [["df_beverages", "df_food"], "simple_winddow"],
+    "tables": [["beverages", "food"], "simple_window"],
     "last_reviewed": ["1980-01-01","1980-01-01"],
 }
 memory_state_df = pd.DataFrame(data)
@@ -23,7 +23,7 @@ con.execute("CREATE TABLE IF NOT EXISTS memory_state AS SELECT * FROM memory_sta
 # CROSS JOIN EXERCISES
 # ------------------------------------------------------------
 
-df_beverages = pd.DataFrame(
+beverages = pd.DataFrame(
     {
         "beverage": [
             "Coffee",
@@ -40,9 +40,9 @@ df_beverages = pd.DataFrame(
         "price": [3, 2, 4, 3, 1, 5, 5, 3, 4, 6],
     }
 )
-con.execute("CREATE TABLE IF NOT EXISTS beverages AS SELECT * FROM df_beverages")
+con.execute("CREATE TABLE IF NOT EXISTS beverages AS SELECT * FROM beverages")
 
-df_food = pd.DataFrame(
+food = pd.DataFrame(
     {
         "food": [
             "Burger",
@@ -61,4 +61,4 @@ df_food = pd.DataFrame(
 )
 
 
-con.execute("CREATE TABLE IF NOT EXISTS food AS SELECT * FROM df_food")
+con.execute("CREATE TABLE IF NOT EXISTS food AS SELECT * FROM food")
